@@ -2,13 +2,11 @@ import { Effect, Schema } from "effect";
 import { TmdbHttpClient } from "../../http-client";
 import { HttpClientRequest, HttpClientResponse } from "@effect/platform";
 
-interface SearchMultiOptions {
-  query: string;
+interface DiscoverMovieOptions {
   page?: number;
-  includeAdult?: boolean;
 }
 
-export const SearchMultiResponse = Schema.Struct({
+export const DiscoverMovieResponse = Schema.Struct({
   page: Schema.Number,
   results: Schema.Array(
     Schema.Struct({
@@ -22,24 +20,24 @@ export const SearchMultiResponse = Schema.Struct({
   total_results: Schema.Number,
 });
 
-export const TmdbSearchMultiMethod = Effect.fn("searchMulti")(function* (
-  options: SearchMultiOptions
+export const TmdbDiscoverMovieMethod = Effect.fn("discoverMovie")(function* (
+  options?: DiscoverMovieOptions
 ) {
   const httpClient = yield* TmdbHttpClient;
 
-  const request = HttpClientRequest.get("/search/multi").pipe(
+  const request = HttpClientRequest.get("/discover/movie").pipe(
     HttpClientRequest.appendUrlParams({
-      include_adult: options.includeAdult,
-      page: options.page ?? 1,
-      query: options.query,
+      page: options?.page ?? 1,
     })
   );
 
   const response = yield* httpClient
     .execute(request)
-    .pipe(
-      Effect.flatMap(HttpClientResponse.schemaBodyJson(SearchMultiResponse))
-    );
+    .pipe
+    //   Effect.flatMap(HttpClientResponse.schemaBodyJson(DiscoverMovieResponse))
+    ();
+
+  console.log(yield* response.json);
 
   return response;
 });

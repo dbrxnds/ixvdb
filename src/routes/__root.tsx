@@ -7,6 +7,7 @@ import { NotFound } from "~/components/NotFound";
 import { seo } from "~/utils/seo";
 import mantineCss from "@mantine/core/styles.css?url";
 import { MantineProvider } from "@mantine/core";
+import { RegistryProvider } from "@effect-atom/atom-react";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -63,7 +64,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <MantineProvider defaultColorScheme="dark">{children}</MantineProvider>
+        <MantineProvider defaultColorScheme="dark">
+          <RegistryProvider>{children}</RegistryProvider>
+        </MantineProvider>
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />
       </body>

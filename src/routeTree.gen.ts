@@ -12,6 +12,7 @@ import { createServerRootRoute } from '@tanstack/react-start/server'
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { ServerRoute as ApiRpcSplatServerRouteImport } from './routes/api/rpc.$'
 import { ServerRoute as ApiAuthSplatServerRouteImport } from './routes/api/auth.$'
 
 const rootServerRouteImport = createServerRootRoute()
@@ -20,6 +21,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRpcSplatServerRoute = ApiRpcSplatServerRouteImport.update({
+  id: '/api/rpc/$',
+  path: '/api/rpc/$',
+  getParentRoute: () => rootServerRouteImport,
 } as any)
 const ApiAuthSplatServerRoute = ApiAuthSplatServerRouteImport.update({
   id: '/api/auth/$',
@@ -50,24 +56,28 @@ export interface RootRouteChildren {
 }
 export interface FileServerRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatServerRoute
+  '/api/rpc/$': typeof ApiRpcSplatServerRoute
 }
 export interface FileServerRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatServerRoute
+  '/api/rpc/$': typeof ApiRpcSplatServerRoute
 }
 export interface FileServerRoutesById {
   __root__: typeof rootServerRouteImport
   '/api/auth/$': typeof ApiAuthSplatServerRoute
+  '/api/rpc/$': typeof ApiRpcSplatServerRoute
 }
 export interface FileServerRouteTypes {
   fileServerRoutesByFullPath: FileServerRoutesByFullPath
-  fullPaths: '/api/auth/$'
+  fullPaths: '/api/auth/$' | '/api/rpc/$'
   fileServerRoutesByTo: FileServerRoutesByTo
-  to: '/api/auth/$'
-  id: '__root__' | '/api/auth/$'
+  to: '/api/auth/$' | '/api/rpc/$'
+  id: '__root__' | '/api/auth/$' | '/api/rpc/$'
   fileServerRoutesById: FileServerRoutesById
 }
 export interface RootServerRouteChildren {
   ApiAuthSplatServerRoute: typeof ApiAuthSplatServerRoute
+  ApiRpcSplatServerRoute: typeof ApiRpcSplatServerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -83,6 +93,13 @@ declare module '@tanstack/react-router' {
 }
 declare module '@tanstack/react-start/server' {
   interface ServerFileRoutesByPath {
+    '/api/rpc/$': {
+      id: '/api/rpc/$'
+      path: '/api/rpc/$'
+      fullPath: '/api/rpc/$'
+      preLoaderRoute: typeof ApiRpcSplatServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -101,6 +118,7 @@ export const routeTree = rootRouteImport
   ._addFileTypes<FileRouteTypes>()
 const rootServerRouteChildren: RootServerRouteChildren = {
   ApiAuthSplatServerRoute: ApiAuthSplatServerRoute,
+  ApiRpcSplatServerRoute: ApiRpcSplatServerRoute,
 }
 export const serverRouteTree = rootServerRouteImport
   ._addFileChildren(rootServerRouteChildren)

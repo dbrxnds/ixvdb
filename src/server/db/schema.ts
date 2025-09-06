@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
   pgTable,
   text,
@@ -70,16 +71,7 @@ export const verification = pgTable("verification", {
 
 export const media = pgTable("media", {
   id: text().primaryKey(),
-  title: text().notNull(),
-  type: text({ enum: ["movie", "tv_show", "documentary"] }).notNull(),
-  releaseYear: integer(),
-  description: text(),
-  createdAt: timestamp().defaultNow().notNull(),
   tmdbId: integer().unique(),
-  updatedAt: timestamp()
-    .defaultNow()
-    .$onUpdate(() => /* @__PURE__ */ new Date())
-    .notNull(),
 });
 
 export const ratingCategories = pgTable("rating_categories", {
@@ -121,3 +113,18 @@ export const userRatings = pgTable(
     ),
   })
 );
+
+export const userRatingsRelations = relations(userRatings, ({ one }) => ({
+  user: one(user, {
+    fields: [userRatings.userId],
+    references: [user.id],
+  }),
+  media: one(media, {
+    fields: [userRatings.mediaId],
+    references: [media.id],
+  }),
+  category: one(ratingCategories, {
+    fields: [userRatings.categoryId],
+    references: [ratingCategories.id],
+  }),
+}));

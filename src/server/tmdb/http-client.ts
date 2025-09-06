@@ -3,6 +3,7 @@ import {
   FetchHttpClient,
   HttpClient,
   HttpClientRequest,
+  HttpClientResponse,
 } from "@effect/platform";
 
 export class TmdbHttpClient extends Effect.Service<TmdbHttpClient>()(
@@ -10,16 +11,21 @@ export class TmdbHttpClient extends Effect.Service<TmdbHttpClient>()(
   {
     dependencies: [FetchHttpClient.layer],
     effect: Effect.gen(function* () {
+      const apiKey = yield* Config.redacted("TMDB_API_KEY");
+
       return (yield* HttpClient.HttpClient).pipe(
-        HttpClient.mapRequest(
-          HttpClientRequest.prependUrl("https://www.omdbapi.com/3")
-        ),
-        HttpClient.mapRequest(
-          HttpClientRequest.appendUrlParam(
-            "apiKey",
-            Redacted.value(yield* Config.redacted("OMDB_API_KEY"))
+        HttpClient.mapRequest((request) =>
+          request.pipe(
+            HttpClientRequest.prependUrl("https://api.themoviedb.org/3"),
+            HttpClientRequest.setHeader(
+              "Authorization",
+              `Bearer ${Redacted.value(apiKey)}`
+            )
           )
-        )
+        ),
+        HttpClient.retryTransient({
+          times: 3,
+        })
       );
     }),
   }
